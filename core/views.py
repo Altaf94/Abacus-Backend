@@ -317,9 +317,9 @@ class AssignQuestionsSimpleView(APIView):
 		# Build the query
 		if where_conditions:
 			where_clause = " AND ".join(where_conditions)
-			query = f"SELECT serial, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, answer, complexity, length, student_id, teacher_id, activity_name FROM core_assignedquestion WHERE {where_clause} ORDER BY serial"
+			query = f"SELECT serial, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, answer, complexity, length, student_id, teacher_id, activity_name, speed, section_id FROM core_assignedquestion WHERE {where_clause} ORDER BY serial"
 		else:
-			query = "SELECT serial, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, answer, complexity, length, student_id, teacher_id, activity_name FROM core_assignedquestion ORDER BY serial"
+			query = "SELECT serial, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, answer, complexity, length, student_id, teacher_id, activity_name, speed, section_id FROM core_assignedquestion ORDER BY serial"
 		
 		with connection.cursor() as cursor:
 			cursor.execute(query, where_params)
@@ -328,7 +328,7 @@ class AssignQuestionsSimpleView(APIView):
 			cols = [
 				"serial", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
 				"k", "l", "m", "n", "o", "p", "q", "r", "s", "t",
-				"answer", "complexity", "length", "student_id", "teacher_id", "activity_name"
+				"answer", "complexity", "length", "student_id", "teacher_id", "activity_name", "speed", "section_id"
 			]
 			assigned_data = [dict(zip(cols, row)) for row in rows]
 		
@@ -513,16 +513,28 @@ class AuthLoginView(APIView):
 	permission_classes = [AllowAny]
 	
 	def post(self, request):
-		username = request.data.get('username')
+		email_or_username = request.data.get('email') or request.data.get('username')
 		password = request.data.get('password')
 		
-		if not username or not password:
+		if not email_or_username or not password:
 			return Response({
-				"error": "Username and password are required"
+				"error": "Email/username and password are required"
 			}, status=status.HTTP_400_BAD_REQUEST)
 		
-		# Authenticate user
-		user = authenticate(username=username, password=password)
+		# Try to authenticate - first check if it's an email or username
+		user = None
+		
+		# Check if it looks like an email (contains @)
+		if '@' in email_or_username:
+			try:
+				# Find user by email first, then authenticate with username
+				user_obj = User.objects.get(email=email_or_username)
+				user = authenticate(username=user_obj.username, password=password)
+			except User.DoesNotExist:
+				user = None
+		else:
+			# It's a username, authenticate directly
+			user = authenticate(username=email_or_username, password=password)
 		
 		if user is not None:
 			return Response({
@@ -536,7 +548,7 @@ class AuthLoginView(APIView):
 			}, status=status.HTTP_200_OK)
 		else:
 			return Response({
-				"error": "Invalid username or password"
+				"error": "Invalid email/username or password"
 			}, status=status.HTTP_401_UNAUTHORIZED)
 
 
