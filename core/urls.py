@@ -1,35 +1,14 @@
 from django.urls import path
-from .views import (
-    AbacusExerciseCreateView,
-    AbacusExerciseQuestionsView,
-    LiveSessionCreateView,
-    LiveSessionJoinView,
-    LiveSessionCurrentQuestionView,
-    LiveSessionAdvanceView,
-    LiveSessionEndView,
-    AssignQuestionsSimpleView,
-    LegacyQuestionsListView,
-    AssignLegacyDirectView,
-    AuthLoginView,
-    StudentsListView,
-    SectionsListView,
-    ComplexityListView,
-)
+from .views import AuthRegisterView, AuthLoginView, AssignmentCreateView, StudentsAndSectionsView
 
 urlpatterns = [
-    path('abacus-exercise/', AbacusExerciseCreateView.as_view(), name='abacus_exercise_create'),
-    path('abacus-exercise/<int:pk>/questions/', AbacusExerciseQuestionsView.as_view(), name='abacus_exercise_questions'),
-    path('live-session/', LiveSessionCreateView.as_view(), name='live_session_create'),
-    path('live-session/<str:session_code>/join/', LiveSessionJoinView.as_view(), name='live_session_join'),
-    path('live-session/<str:session_code>/current/', LiveSessionCurrentQuestionView.as_view(), name='live_session_current'),
-    path('live-session/<str:session_code>/advance/', LiveSessionAdvanceView.as_view(), name='live_session_advance'),
-    path('live-session/<str:session_code>/end/', LiveSessionEndView.as_view(), name='live_session_end'),
-    path('assign-questions/', AssignQuestionsSimpleView.as_view(), name='assign_questions_simple'),
-    path('questions/', LegacyQuestionsListView.as_view(), name='legacy_questions_list'),
-    path('assign-legacy-direct/', AssignLegacyDirectView.as_view(), name='assign_legacy_direct'),
+    # Authentication
+    path('auth/register/', AuthRegisterView.as_view(), name='auth_register'),
     path('auth/login/', AuthLoginView.as_view(), name='auth_login'),
-    path('auth/login', AuthLoginView.as_view(), name='auth_login_no_slash'),
-    path('students/', StudentsListView.as_view(), name='students_list'),
-    path('sections/', SectionsListView.as_view(), name='sections_list'),
-    path('complexities/', ComplexityListView.as_view(), name='complexities_list'),
+
+    # Assignments
+    path('assignments/', AssignmentCreateView.as_view(), name='assignments_create'),
+
+    # Combined students + sections for dropdowns
+    path('students_sections/', StudentsAndSectionsView.as_view(), name='students_and_sections'),
 ]
