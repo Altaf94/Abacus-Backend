@@ -10,7 +10,7 @@ class AbacusExerciseAdmin(admin.ModelAdmin):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-	list_display = ("id", "concept", "length_of_question", "created_at")
-	search_fields = ("concept", "content")
+	list_display = ("id", "serial", "length", "created_at")
+	search_fields = ("serial", "answer")
 
 # Register your models here.
